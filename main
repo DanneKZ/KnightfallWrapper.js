@@ -1,0 +1,82 @@
+// === [ KNIGHTFALL SECURITY SYSTEM ] ===
+// Author: Daniel (DD1_JR)
+// Description: Secure Discord OAuth2 Wrapper for CinderCrest
+
+(function() {
+    'use strict';
+
+    // 1. Configuration - Replace with your actual Render URL
+    const BASE_URL = "https://knightfall-system-bot.onrender.com";
+    const AUTH_URL = `${BASE_URL}/auth/discord`;
+    const VERIFY_API = `${BASE_URL}/api/verify`;
+
+    // 2. This is where Blaze puts his code
+    function launchCinderCrest() {
+        console.log("Knightfall: Authentication Successful.");
+        
+        /* PASTE YOUR ENTIRE 531KB MOD CODE HERE 
+           PASTE YOUR ENTIRE 531KB MOD CODE HERE 
+        */
+       
+        alert("CinderCrest Loaded Successfully!");
+    }
+
+    // 3. Authentication Logic
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token') || localStorage.getItem('knightfall_token');
+
+    if (token) {
+        localStorage.setItem('knightfall_token', token);
+        
+        // Clear the token from URL for a clean look
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        fetch(`${VERIFY_API}?token=${token}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.authorized) {
+                    launchCinderCrest();
+                } else {
+                    localStorage.removeItem('knightfall_token');
+                    createLoginScreen();
+                }
+            })
+            .catch(err => {
+                console.error("Auth Error:", err);
+                createLoginScreen("Serveranslutning misslyckades. Försök igen.");
+            });
+    } else {
+        createLoginScreen();
+    }
+
+    // 4. Swedish Professional UI
+    function createLoginScreen(errorMsg = "") {
+        const overlay = document.createElement('div');
+        overlay.id = "knightfall-overlay";
+        overlay.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:#0b0c10; z-index:999999; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#66fcf1; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align:center;";
+        
+        overlay.innerHTML = `
+            <div style="padding: 40px; border: 1px solid #45a29e; border-radius: 15px; background: #1f2833; box-shadow: 0 0 20px rgba(102, 252, 241, 0.2);">
+                <h1 style="margin:0; font-size: 32px; letter-spacing: 2px;">KNIGHTFALL</h1>
+                <p style="color: #c5c6c7; margin-bottom: 30px;">Systemverifiering krävs för CinderCrest</p>
+                
+                ${errorMsg ? `<p style="color: #ff4b2b; font-size: 14px;">${errorMsg}</p>` : ''}
+                
+                <button id="loginBtn" style="padding: 12px 35px; background: #45a29e; color: #0b0c10; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                    Logga in med Discord
+                </button>
+                
+                <div style="margin-top: 20px; font-size: 12px; color: #45a29e; opacity: 0.6;">
+                    Securely protected by Knightfall v2.0
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+
+        document.getElementById('loginBtn').onclick = () => {
+            document.getElementById('loginBtn').innerText = "Väntar på Discord...";
+            window.location.href = AUTH_URL;
+        };
+    }
+})();
