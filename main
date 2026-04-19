@@ -1,54 +1,43 @@
-// === [ KNIGHTFALL SECURITY SYSTEM V4 - FULL & FINAL ] ===
+// === [ KNIGHTFALL SECURITY SYSTEM V4 - AUTO-HUNTER EDITION ] ===
 // Author: Daniel (DD1_JR)
-// Description: Secure Discord OAuth2 Wrapper with Popup Handshake (Aurora Style)
-// Everything is English and Auto-Synced.
+// Fixed: Forced redirect after successful login
 
 (function() {
     'use strict';
 
-    // 1. Configuration
     const BASE_URL = "https://knightfall-system-bot.onrender.com";
     const AUTH_URL = `${BASE_URL}/auth/discord`;
     const VERIFY_API = `${BASE_URL}/api/verify`;
 
-    // 2. This is where you put your mod code, Blaze!
     function launchCinderCrest() {
         console.log("Knightfall: Authentication Successful. Loading Mod...");
-        
         /* === [ PASTE YOUR MOD CODE BELOW ] === */
-        
         alert("Knightfall: CinderCrest Loaded Successfully!");
-        
         /* === [ PASTE YOUR MOD CODE ABOVE ] === */
     }
 
-    // 3. Initial Check
-    const token = localStorage.getItem('knightfall_token');
-
-    if (token) {
-        verifyToken(token);
-    } else {
-        createLoginScreen();
+    // فحص التوكن عند تشغيل الصفحة
+    const initialToken = localStorage.getItem('knightfall_token');
+    if (initialToken) { 
+        verifyToken(initialToken); 
+    } else { 
+        createLoginScreen(); 
     }
 
     function verifyToken(tk) {
         fetch(`${VERIFY_API}?token=${tk}`)
             .then(res => res.json())
             .then(data => {
-                if (data.authorized) {
-                    launchCinderCrest();
-                } else {
-                    localStorage.removeItem('knightfall_token');
-                    createLoginScreen("Session expired. Please login again.");
+                if (data.authorized) { 
+                    launchCinderCrest(); 
+                } else { 
+                    localStorage.removeItem('knightfall_token'); 
+                    createLoginScreen("Session invalid. Please login again."); 
                 }
             })
-            .catch(err => {
-                console.error("Auth Error:", err);
-                createLoginScreen("Connecting to server... Please wait.");
-            });
+            .catch(() => { createLoginScreen("Server connecting..."); });
     }
 
-    // 4. Ultra Premium Neon-Glass UI
     function createLoginScreen(errorMsg = "") {
         const existing = document.getElementById('knightfall-overlay');
         if (existing) existing.remove();
@@ -56,144 +45,83 @@
         const style = document.createElement('style');
         style.textContent = `
             @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@800&family=Poppins:wght@300;400;600&display=swap');
-
             #knightfall-overlay {
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                 background: radial-gradient(circle at center, #10121a 0%, #050507 100%);
                 backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
                 z-index: 9999999; display: flex; justify-content: center; align-items: center;
-                font-family: 'Poppins', sans-serif; overflow: hidden; animation: kf-fadeIn 1s ease forwards;
+                font-family: 'Poppins', sans-serif;
             }
-
             .kf-card {
                 background: rgba(11, 12, 16, 0.6); padding: 60px 50px; border-radius: 28px;
-                position: relative; box-shadow: 0 0 30px rgba(102, 252, 241, 0.1);
-                text-align: center; max-width: 440px; width: 90%; animation: kf-cardSlideUp 0.8s ease forwards;
+                border: 1px solid rgba(102, 252, 241, 0.2); text-align: center; max-width: 440px; width: 90%;
             }
-
-            .kf-card::before {
-                content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
-                background: linear-gradient(45deg, #66fcf1, #45a29e, #1f2833, #7289da);
-                border-radius: 30px; z-index: -1; background-size: 400%;
-                animation: kf-neonBorder 10s linear infinite; filter: blur(3px); opacity: 0.5;
-            }
-
             .kf-logo {
                 font-family: 'Orbitron', sans-serif; font-size: 42px; font-weight: 800;
                 letter-spacing: 8px; margin: 0; background: linear-gradient(90deg, #66fcf1, #ffffff, #66fcf1);
-                background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                animation: kf-logoShine 4s linear infinite; filter: drop-shadow(0 0 15px rgba(102, 252, 241, 0.6));
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             }
-
-            .kf-subtitle { color: #c5c6c7; font-size: 13px; margin: 15px 0 45px 0; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; }
-
+            .kf-subtitle { color: #c5c6c7; font-size: 13px; margin: 15px 0 45px 0; letter-spacing: 2px; text-transform: uppercase; }
             .kf-btn {
                 background: transparent; color: #ffffff; border: 2px solid #7289da;
                 padding: 18px 30px; border-radius: 14px; font-size: 17px; font-weight: 600;
-                cursor: pointer; display: flex; align-items: center; justify-content: center;
-                gap: 15px; width: 100%; position: relative; overflow: hidden; transition: all 0.3s ease;
-                box-shadow: 0 0 15px rgba(114, 137, 218, 0.2); text-transform: uppercase;
+                cursor: pointer; width: 100%; transition: all 0.3s ease; text-transform: uppercase;
             }
-
-            .kf-btn:hover { background: #7289da; box-shadow: 0 0 30px rgba(114, 137, 218, 0.6); transform: scale(1.02); }
-
-            .kf-error { color: #ff4b2b; font-size: 13px; background: rgba(255, 75, 43, 0.15); padding: 12px; border-radius: 8px; margin-bottom: 25px; border: 1px solid rgba(255, 75, 43, 0.3); }
-
-            .kf-footer { margin-top: 40px; font-size: 10px; color: #45a29e; opacity: 0.4; letter-spacing: 3px; text-transform: uppercase; }
-
-            @keyframes kf-fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes kf-cardSlideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-            @keyframes kf-neonBorder { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-            @keyframes kf-logoShine { to { background-position: 200% center; } }
-
-            .kf-particles { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; }
-            .kf-particle { position: absolute; background: rgba(102, 252, 241, 0.2); border-radius: 50%; animation: kf-particleFloat 15s infinite linear; }
-            @keyframes kf-particleFloat { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 100% { transform: translateY(-10vh) scale(1); opacity: 0; } }
+            .kf-btn:hover { background: #7289da; transform: scale(1.02); }
+            .kf-error { color: #ff4b2b; font-size: 13px; margin-bottom: 25px; }
         `;
         document.head.appendChild(style);
 
         const overlay = document.createElement('div');
         overlay.id = "knightfall-overlay";
-        const particlesContainer = document.createElement('div');
-        particlesContainer.className = "kf-particles";
-        for (let i = 0; i < 20; i++) {
-            const particle = document.createElement('div');
-            particle.className = "kf-particle";
-            particle.style.width = particle.style.height = `${Math.random() * 4 + 2}px`;
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.animationDelay = `${Math.random() * 15}s`;
-            particlesContainer.appendChild(particle);
-        }
-        overlay.appendChild(particlesContainer);
-
-        overlay.innerHTML += `
+        overlay.innerHTML = `
             <div class="kf-card">
                 <h1 class="kf-logo">KNIGHTFALL</h1>
-                <p class="kf-subtitle">Authentication required for CinderCrest</p>
+                <p class="kf-subtitle">Authentication required</p>
                 ${errorMsg ? `<div class="kf-error">${errorMsg}</div>` : ''}
                 <button class="kf-btn" id="loginBtn">Login with Discord</button>
-                <div class="kf-footer">Powered by Knightfall Security Engine V4</div>
             </div>
         `;
-        
         document.body.appendChild(overlay);
 
         document.getElementById('loginBtn').onclick = () => {
             const btn = document.getElementById('loginBtn');
-            btn.innerHTML = 'CONNECTING...';
-            btn.style.opacity = '0.7';
-            btn.style.cursor = 'not-allowed';
-
+            btn.innerHTML = 'CHECKING AUTH...';
+            
             const hwid = btoa(navigator.userAgent + navigator.language).substring(0, 16);
-            const authUrl = `${AUTH_URL}?hwid=${hwid}`;
-            
-            const width = 500, height = 750;
-            const left = (window.innerWidth / 2) - (width / 2);
-            const top = (window.innerHeight / 2) - (height / 2);
-            
-            const authWindow = window.open(authUrl, "Knightfall Auth", `width=${width},height=${height},top=${top},left=${left}`);
+            const authWindow = window.open(`${AUTH_URL}?hwid=${hwid}`, "Knightfall Auth", "width=500,height=750");
 
-            // The specific fix for the "Connecting" hang
-            const messageListener = (event) => {
-                if (!event.origin.includes("onrender.com")) return; 
+            // مراقب ذكي (Hunter): يفحص التوكن كل ثانية حتى لو لم تصل الرسالة
+            const hunterInterval = setInterval(() => {
+                // إذا وجد التوكن في الـ LocalStorage (الذي يضعه السيرفر عبر الصفحة البيضاء)
+                const checkTk = localStorage.getItem('knightfall_token');
                 
-                if (event.data.type === 'knightfall-auth-success') {
-                    const receivedToken = event.data.token;
-                    localStorage.setItem('knightfall_token', receivedToken);
+                if (checkTk) {
+                    clearInterval(hunterInterval);
+                    if (authWindow) authWindow.close();
                     
                     btn.innerHTML = 'ACCESS GRANTED!';
-                    btn.style.color = '#66fcf1';
                     btn.style.borderColor = '#66fcf1';
-                    btn.style.opacity = '1';
-
-                    // Cleanup listener
-                    window.removeEventListener('message', messageListener);
                     
-                    // Close UI and Launch Mod
                     setTimeout(() => {
-                        overlay.style.opacity = '0';
-                        overlay.style.transition = 'opacity 0.5s ease';
-                        setTimeout(() => {
-                            overlay.remove();
-                            launchCinderCrest();
-                        }, 500);
-                    }, 800);
+                        overlay.remove();
+                        launchCinderCrest();
+                    }, 1000);
                 }
-            };
 
-            window.addEventListener('message', messageListener);
-
-            // Safety Check: If window is closed without success
-            const checkWindow = setInterval(() => {
-                if (authWindow.closed) {
-                    clearInterval(checkWindow);
-                    if (!localStorage.getItem('knightfall_token')) {
-                        btn.innerHTML = 'Login with Discord';
-                        btn.style.opacity = '1';
-                        btn.style.cursor = 'pointer';
-                    }
+                // إذا أغلق النافذة يدوياً ولم يجد توكن، يعيد الزر
+                if (authWindow && authWindow.closed && !localStorage.getItem('knightfall_token')) {
+                    clearInterval(hunterInterval);
+                    btn.innerHTML = 'Login with Discord';
                 }
             }, 1000);
+
+            // استماع للرسالة (كطريقة أساسية)
+            window.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'knightfall-auth-success') {
+                    localStorage.setItem('knightfall_token', event.data.token);
+                }
+            });
         };
     }
 })();
