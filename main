@@ -1,79 +1,44 @@
-// === [ KNIGHTFALL SECURITY SYSTEM V4 - THE FINAL LOCK ] ===
-// Author: Daniel (DD1_JR)
-// Function: Captures token from URL and launches the mod.
-
+// === [ KNIGHTFALL SECURITY - THE UNSTOPPABLE MANUAL FIX ] ===
 (function() {
     'use strict';
 
     const BASE_URL = "https://knightfall-system-bot.onrender.com";
     const VERIFY_API = `${BASE_URL}/api/verify`;
 
-    // 1. دالة تشغيل المود (هنا يوضع كود CinderCrest)
     function launchCinderCrest() {
-        console.log("Knightfall: Access Granted!");
-        // لإزالة واجهة التسجيل إذا كانت موجودة
+        console.log("Knightfall ACTIVE!");
         const overlay = document.getElementById('knightfall-overlay');
         if (overlay) overlay.remove();
-        
-        /* === [ ضع كود المود الخاص بك هنا ] === */
-        alert("SUCCESS: Knightfall CinderCrest is now ACTIVE!");
-        /* === [ ------------------------- ] === */
+        alert("🛡️ KNIGHTFALL LOADED SUCCESSFULLY!");
+        /* === [ ضع كود المود هنا ] === */
     }
 
-    // 2. صيد التوكن من الرابط (Query Hunter)
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = urlParams.get('token');
-
-    if (tokenFromUrl) {
-        localStorage.setItem('knightfall_token', tokenFromUrl);
-        // تنظيف شريط العنوان فوراً ليكون شكل اللعبة نظيفاً
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    // 3. التحقق من التوكن وتشغيل النظام
+    // فحص إذا كان هناك توكن قديم مخزن
     const savedToken = localStorage.getItem('knightfall_token');
     if (savedToken) {
-        fetch(`${VERIFY_API}?token=${savedToken}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.authorized) {
-                    launchCinderCrest();
-                } else {
-                    localStorage.removeItem('knightfall_token');
-                    createLoginScreen("Your session is invalid. Login again.");
-                }
-            })
-            .catch(() => {
-                // إذا السيرفر تأخر في الرد، نحاول التشغيل بالتوكن المخزن كحالة احتياطية
-                console.warn("Server busy, checking local session...");
-                if (savedToken) launchCinderCrest();
-            });
+        verifyToken(savedToken);
     } else {
         createLoginScreen();
     }
 
-    // 4. واجهة تسجيل الدخول (التي طلبتها بالإنجليزية)
+    function verifyToken(tk) {
+        fetch(`${VERIFY_API}?token=${tk}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.authorized) launchCinderCrest();
+                else createLoginScreen("Invalid or Expired Token.");
+            })
+            .catch(() => createLoginScreen());
+    }
+
     function createLoginScreen(msg = "") {
         if (document.getElementById('knightfall-overlay')) return;
-        
         const style = document.createElement('style');
         style.textContent = `
-            #knightfall-overlay {
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: radial-gradient(circle at center, #0f1016 0%, #050507 100%);
-                z-index: 9999999; display: flex; justify-content: center; align-items: center;
-                font-family: 'Segoe UI', Roboto, sans-serif; color: white;
-            }
-            .kf-card {
-                background: rgba(20, 20, 25, 0.9); padding: 50px; border-radius: 25px;
-                border: 1px solid #66fcf1; text-align: center; box-shadow: 0 0 30px rgba(102, 252, 241, 0.2);
-            }
-            .kf-btn {
-                background: #7289da; color: white; border: none; padding: 15px 45px;
-                border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 25px;
-                font-size: 16px; transition: 0.3s;
-            }
-            .kf-btn:hover { background: #5d6eb3; transform: scale(1.05); }
+            #knightfall-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0c10; z-index: 9999999; display: flex; justify-content: center; align-items: center; font-family: 'Segoe UI', sans-serif; }
+            .kf-card { background: #1f2833; padding: 40px; border-radius: 20px; border: 2px solid #66fcf1; text-align: center; color: white; width: 350px; }
+            .kf-btn { background: #45a29e; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 15px; }
+            .kf-input { background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; width: 100%; padding: 10px; border-radius: 5px; margin-top: 15px; text-align: center; }
         `;
         document.head.appendChild(style);
 
@@ -81,17 +46,33 @@
         overlay.id = "knightfall-overlay";
         overlay.innerHTML = `
             <div class="kf-card">
-                <h1 style="color:#66fcf1; margin:0; letter-spacing:4px;">KNIGHTFALL</h1>
-                <p style="opacity:0.7; margin-top:10px;">${msg || "Discord Authentication Required"}</p>
-                <button class="kf-btn" id="loginBtn">LOGIN WITH DISCORD</button>
+                <h1 style="color:#66fcf1; margin:0;">KNIGHTFALL</h1>
+                <p style="font-size:12px; opacity:0.6;">${msg || "MANUAL ACTIVATION REQUIRED"}</p>
+                
+                <button class="kf-btn" id="goAuth">1. GET TOKEN (DISCORD)</button>
+                
+                <input type="text" id="tkInput" class="kf-input" placeholder="PASTE TOKEN HERE">
+                <button class="kf-btn" id="saveTk" style="background:#5865F2;">2. ACTIVATE MOD</button>
+                
+                <p style="font-size:10px; margin-top:10px;">Once you login on Discord, copy the token and paste it above.</p>
             </div>
         `;
         document.body.appendChild(overlay);
 
-        document.getElementById('loginBtn').onclick = () => {
+        document.getElementById('goAuth').onclick = () => {
             const hwid = btoa(navigator.userAgent).substring(0, 16);
-            // تحويل الصفحة بالكامل للسيرفر
-            window.location.href = `${BASE_URL}/auth/discord?hwid=${hwid}`;
+            window.open(`${BASE_URL}/auth/discord?hwid=${hwid}`, "_blank");
+        };
+
+        document.getElementById('saveTk').onclick = () => {
+            const val = document.getElementById('tkInput').value.trim();
+            if (val.length > 50) {
+                localStorage.setItem('knightfall_token', val);
+                alert("Token Saved! Reloading...");
+                location.reload();
+            } else {
+                alert("Invalid Token! Please copy the whole code.");
+            }
         };
     }
 })();
