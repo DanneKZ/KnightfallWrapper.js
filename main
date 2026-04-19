@@ -1,7 +1,7 @@
-// === [ KNIGHTFALL SECURITY SYSTEM V4 - ENGLISH EDITION ] ===
+// === [ KNIGHTFALL SECURITY SYSTEM V4 - FULL & FINAL ] ===
 // Author: Daniel (DD1_JR)
 // Description: Secure Discord OAuth2 Wrapper with Popup Handshake (Aurora Style)
-// Usage: Paste your mod code inside the launchCinderCrest() function.
+// Everything is English and Auto-Synced.
 
 (function() {
     'use strict';
@@ -48,7 +48,7 @@
             });
     }
 
-    // 4. Ultra Premium Neon-Glass UI (English Version)
+    // 4. Ultra Premium Neon-Glass UI
     function createLoginScreen(errorMsg = "") {
         const existing = document.getElementById('knightfall-overlay');
         if (existing) existing.remove();
@@ -92,7 +92,7 @@
                 padding: 18px 30px; border-radius: 14px; font-size: 17px; font-weight: 600;
                 cursor: pointer; display: flex; align-items: center; justify-content: center;
                 gap: 15px; width: 100%; position: relative; overflow: hidden; transition: all 0.3s ease;
-                box-shadow: 0 0 15px rgba(114, 137, 218, 0.2); text-transform: uppercase; letter-spacing: 1px;
+                box-shadow: 0 0 15px rgba(114, 137, 218, 0.2); text-transform: uppercase;
             }
 
             .kf-btn:hover { background: #7289da; box-shadow: 0 0 30px rgba(114, 137, 218, 0.6); transform: scale(1.02); }
@@ -141,7 +141,9 @@
         document.getElementById('loginBtn').onclick = () => {
             const btn = document.getElementById('loginBtn');
             btn.innerHTML = 'CONNECTING...';
-            
+            btn.style.opacity = '0.7';
+            btn.style.cursor = 'not-allowed';
+
             const hwid = btoa(navigator.userAgent + navigator.language).substring(0, 16);
             const authUrl = `${AUTH_URL}?hwid=${hwid}`;
             
@@ -151,30 +153,47 @@
             
             const authWindow = window.open(authUrl, "Knightfall Auth", `width=${width},height=${height},top=${top},left=${left}`);
 
+            // The specific fix for the "Connecting" hang
             const messageListener = (event) => {
-                if (event.origin !== BASE_URL) return; 
+                if (!event.origin.includes("onrender.com")) return; 
                 
                 if (event.data.type === 'knightfall-auth-success') {
                     const receivedToken = event.data.token;
                     localStorage.setItem('knightfall_token', receivedToken);
                     
                     btn.innerHTML = 'ACCESS GRANTED!';
-                    btn.style.borderColor = '#66fcf1';
                     btn.style.color = '#66fcf1';
+                    btn.style.borderColor = '#66fcf1';
+                    btn.style.opacity = '1';
 
+                    // Cleanup listener
+                    window.removeEventListener('message', messageListener);
+                    
+                    // Close UI and Launch Mod
                     setTimeout(() => {
                         overlay.style.opacity = '0';
                         overlay.style.transition = 'opacity 0.5s ease';
                         setTimeout(() => {
                             overlay.remove();
-                            window.removeEventListener('message', messageListener);
                             launchCinderCrest();
                         }, 500);
-                    }, 1000);
+                    }, 800);
                 }
             };
 
             window.addEventListener('message', messageListener);
+
+            // Safety Check: If window is closed without success
+            const checkWindow = setInterval(() => {
+                if (authWindow.closed) {
+                    clearInterval(checkWindow);
+                    if (!localStorage.getItem('knightfall_token')) {
+                        btn.innerHTML = 'Login with Discord';
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                    }
+                }
+            }, 1000);
         };
     }
 })();
