@@ -1,6 +1,7 @@
 // === [ KNIGHTFALL SECURITY SYSTEM V4 - FINAL ] ===
 // Author: Daniel (DD1_JR)
-// Description: Secure Discord OAuth2 Wrapper with advanced Neon-Glass UI & Integrated Mod
+// Description: Secure Discord OAuth2 Wrapper with advanced Neon-Glass UI
+// Usage: Paste your mod code inside the launchCinderCrest() function.
 
 (function() {
     'use strict';
@@ -10,21 +11,18 @@
     const AUTH_URL = `${BASE_URL}/auth/discord`;
     const VERIFY_API = `${BASE_URL}/api/verify`;
 
-    // 2. Launch Mod Function
+    // 2. This is where you put your mod code, Blaze!
     function launchCinderCrest() {
         console.log("Knightfall: Authentication Successful. Loading Mod...");
         
-        // --- [ START OF BLAZE'S MOD ] ---
+        /* === [ PASTE YOUR MOD CODE BELOW ] === */
         
-        /* امسح هذا التنبيه والصق كود بليز مكانه (الـ 543 كيلوبايت بالكامل) */
-        alert("CinderCrest Loaded Successfully!"); 
-
-        // --- [ END OF BLAZE'S MOD ] ---
-       
-        console.log("CinderCrest Integrated Successfully!");
+        alert("Knightfall: CinderCrest Loaded Successfully!");
+        
+        /* === [ PASTE YOUR MOD CODE ABOVE ] === */
     }
 
-    // 3. Authentication Logic
+    // 3. Authentication & Verification Logic
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token') || localStorage.getItem('knightfall_token');
 
@@ -44,7 +42,7 @@
             })
             .catch(err => {
                 console.error("Auth Error:", err);
-                createLoginScreen("Servern ansluter... Försök igen om 10 sekunder.");
+                createLoginScreen("Ansluter till servern... Vänta 10 sekunder.");
             });
     } else {
         createLoginScreen();
@@ -57,7 +55,7 @@
 
         const style = document.createElement('style');
         style.textContent = `
-            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=Poppins:wght@300;400;600&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@800&family=Poppins:wght@300;400;600&display=swap');
 
             #knightfall-overlay {
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -97,7 +95,7 @@
                 box-shadow: 0 0 15px rgba(114, 137, 218, 0.2);
             }
 
-            .kf-btn:hover { background: #7289da; box-shadow: 0 0 30px rgba(114, 137, 218, 0.6); }
+            .kf-btn:hover { background: #7289da; box-shadow: 0 0 30px rgba(114, 137, 218, 0.6); transform: scale(1.02); }
 
             .kf-error { color: #ff4b2b; font-size: 13px; background: rgba(255, 75, 43, 0.15); padding: 12px; border-radius: 8px; margin-bottom: 25px; border: 1px solid rgba(255, 75, 43, 0.3); }
 
@@ -109,4 +107,43 @@
             @keyframes kf-logoShine { to { background-position: 200% center; } }
 
             .kf-particles { position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; }
-            .kf-particle { position: absolute
+            .kf-particle { position: absolute; background: rgba(102, 252, 241, 0.2); border-radius: 50%; animation: kf-particleFloat 15s infinite linear; }
+            @keyframes kf-particleFloat { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 100% { transform: translateY(-10vh) scale(1); opacity: 0; } }
+        `;
+        document.head.appendChild(style);
+
+        const overlay = document.createElement('div');
+        overlay.id = "knightfall-overlay";
+        const particlesContainer = document.createElement('div');
+        particlesContainer.className = "kf-particles";
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = "kf-particle";
+            particle.style.width = particle.style.height = `${Math.random() * 4 + 2}px`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDelay = `${Math.random() * 15}s`;
+            particlesContainer.appendChild(particle);
+        }
+        overlay.appendChild(particlesContainer);
+
+        overlay.innerHTML += `
+            <div class="kf-card">
+                <h1 class="kf-logo">KNIGHTFALL</h1>
+                <p class="kf-subtitle">Verifiering krävs för CinderCrest</p>
+                ${errorMsg ? `<div class="kf-error">${errorMsg}</div>` : ''}
+                <button class="kf-btn" id="loginBtn">LOGGA IN MED DISCORD</button>
+                <div class="kf-footer">Protected by Knightfall Security Engine V4</div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+
+        document.getElementById('loginBtn').onclick = () => {
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = 'ANSLUTER...';
+            // Generating HWID based on user environment
+            const hwid = btoa(navigator.userAgent + navigator.language).substring(0, 16);
+            window.location.href = `${AUTH_URL}?hwid=${hwid}`;
+        };
+    }
+})();
