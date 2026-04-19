@@ -1,87 +1,61 @@
-// === [ KNIGHTFALL SECURITY SYSTEM V4 - STABLE REDIRECT ] ===
-// Author: Daniel (DD1_JR)
-// Fixed: Using direct redirect to ensure token delivery.
-
+// === [ KNIGHTFALL SECURITY SYSTEM V4 - THE REDIRECT FIX ] ===
 (function() {
     'use strict';
 
     const BASE_URL = "https://knightfall-system-bot.onrender.com";
-    const AUTH_URL = `${BASE_URL}/auth/discord`;
     const VERIFY_API = `${BASE_URL}/api/verify`;
 
     function launchCinderCrest() {
-        console.log("Knightfall: Authentication Successful.");
-        /* === [ PASTE YOUR MOD CODE BELOW ] === */
-        alert("SUCCESS: CinderCrest is now LOADED!");
-        /* === [ PASTE YOUR MOD CODE ABOVE ] === */
+        console.log("Knightfall: Auth Success!");
+        // هنا تضع كود المود الخاص بك
+        alert("ACCESS GRANTED: Welcome to CinderCrest!");
+        document.getElementById('knightfall-overlay').remove();
     }
 
-    // 1. فحص هل نحن عائدون من الديسكورد ومعنا توكن في الرابط؟
+    // [أهم جزء] - التقاط التوكن من الرابط فور العودة من السيرفر
     const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token');
+    const tokenFromUrl = urlParams.get('token');
 
-    if (urlToken) {
-        localStorage.setItem('knightfall_token', urlToken);
-        // تنظيف الرابط ليعود لشكل اللعبة الطبيعي
+    if (tokenFromUrl) {
+        localStorage.setItem('knightfall_token', tokenFromUrl);
+        // تنظيف الرابط لإزالة التوكن من العنوان
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // 2. التحقق من التوكن الموجود في الذاكرة
     const savedToken = localStorage.getItem('knightfall_token');
     if (savedToken) {
         fetch(`${VERIFY_API}?token=${savedToken}`)
             .then(res => res.json())
             .then(data => {
-                if (data.authorized) {
-                    launchCinderCrest();
-                } else {
-                    localStorage.removeItem('knightfall_token');
-                    createLoginScreen("Invalid session. Please login again.");
-                }
+                if (data.authorized) launchCinderCrest();
+                else createLoginScreen("Invalid Session.");
             })
-            .catch(() => { createLoginScreen(); });
+            .catch(() => createLoginScreen());
     } else {
         createLoginScreen();
     }
 
-    function createLoginScreen(errorMsg = "") {
-        const existing = document.getElementById('knightfall-overlay');
-        if (existing) existing.remove();
-
+    function createLoginScreen(msg = "") {
+        if (document.getElementById('knightfall-overlay')) return;
         const style = document.createElement('style');
         style.textContent = `
-            #knightfall-overlay {
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: #050507; z-index: 9999999; display: flex; 
-                justify-content: center; align-items: center; font-family: sans-serif;
-            }
-            .kf-card {
-                background: #111; padding: 40px; border-radius: 20px;
-                border: 1px solid #66fcf1; text-align: center; color: white;
-            }
-            .kf-btn {
-                background: #7289da; color: white; border: none; padding: 15px 30px;
-                border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 20px;
-            }
+            #knightfall-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050507; z-index: 9999999; display: flex; justify-content: center; align-items: center; font-family: sans-serif; color: white; }
+            .kf-card { background: #111; padding: 50px; border-radius: 25px; border: 1px solid #66fcf1; text-align: center; box-shadow: 0 0 20px #66fcf133; }
+            .kf-btn { background: #7289da; color: white; border: none; padding: 15px 40px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 20px; font-size: 16px; }
         `;
         document.head.appendChild(style);
-
         const overlay = document.createElement('div');
         overlay.id = "knightfall-overlay";
-        overlay.innerHTML = `
-            <div class="kf-card">
-                <h1 style="color:#66fcf1; letter-spacing:5px;">KNIGHTFALL</h1>
-                <p>Authentication Required</p>
-                ${errorMsg ? `<p style="color:red;">${errorMsg}</p>` : ''}
-                <button class="kf-btn" id="loginBtn">LOGIN WITH DISCORD</button>
-            </div>
-        `;
+        overlay.innerHTML = `<div class="kf-card">
+            <h1 style="color:#66fcf1; margin:0;">KNIGHTFALL</h1>
+            <p style="opacity:0.6;">${msg || "Authentication Required"}</p>
+            <button class="kf-btn" id="loginBtn">LOGIN WITH DISCORD</button>
+        </div>`;
         document.body.appendChild(overlay);
 
         document.getElementById('loginBtn').onclick = () => {
-            const hwid = btoa(navigator.userAgent + navigator.language).substring(0, 16);
-            // تحويل مباشر في نفس الصفحة لضمان وصول التوكن
-            window.location.href = `${AUTH_URL}?hwid=${hwid}`;
+            const hwid = btoa(navigator.userAgent).substring(0, 16);
+            window.location.href = `${BASE_URL}/auth/discord?hwid=${hwid}`;
         };
     }
 })();
